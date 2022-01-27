@@ -11,6 +11,8 @@ console.log(getCoords());
 //encapsulating map and map functions in userMap object
 const userMap = {
         coords: [],
+        businesses: [],
+        markers: {},
 
         createMap: function(){
             // Create map: 
@@ -39,6 +41,20 @@ const userMap = {
 
         },
 
+        checkGif: L.icon({
+            iconUrl: './assets/check.gif',
+            iconSize: [30,30], //size of icon
+            iconAnchor: [19,40], //point of icon that corresponds to marker's location
+            popupAnchor: [-5,-35] //point from hich the popup should open relative to iconAnchor
+        }),
+
+        addMarkers() {
+            for(let i=0; i<userMap.businesses.length; i++) {
+            const markers = L.marker([userMap.businesses[i].latitude,userMap.businesses[i].longitude],{icon: this.checkGif})
+            markers.addTo(this.map).bindPopup(`<p1><b>${userMap.businesses[i].name}</b></p1>`).openPopup()
+            }
+        },
+
  }
 
 //handlers
@@ -55,40 +71,49 @@ const checkboxRest = document.getElementById('restaurant')
 const checkboxHotel = document.getElementById('hotel')
 const checkboxMark = document.getElementById('market')
 
-checkboxCof.addEventListener('change', (event) => {
+checkboxCof.addEventListener('change', async (event) => {
   if (event.currentTarget.checked) {
-    getFoursquare('coffee')
+    let data = await fourSquareFetch('coffee')
+    userMap.businesses = mapData(data)
+    userMap.addMarkers()
   } else {
     console.log('cof not checked');
   }
 })
 
-checkboxRest.addEventListener('change', (event) => {
+checkboxRest.addEventListener('change', async (event) => {
   if (event.currentTarget.checked) {
-    getFoursquare('restaurant')
+    let data = await fourSquareFetch('restaurant')
+    userMap.businesses = mapData(data)
+    userMap.addMarkers()
   } else {
     console.log('rest not checked');
   }
 })
 
-checkboxHotel.addEventListener('change', (event) => {
+checkboxHotel.addEventListener('change', async (event) => {
     if (event.currentTarget.checked) {
-      getFoursquare('hotels')
+        let data = await fourSquareFetch('hotels')
+        userMap.businesses = mapData(data)
+        userMap.addMarkers()
     } else {
       console.log('not checked');
     }
   })
 
-  checkboxMark.addEventListener('change', (event) => {
+  checkboxMark.addEventListener('change', async (event) => {
     if (event.currentTarget.checked) {
-      getFoursquare('grocery')
+        let data = await fourSquareFetch('grocery')
+        userMap.businesses = mapData(data)
+        userMap.addMarkers()
     } else {
       console.log('not checked');
     }
   })
 
+// let businessData = [];
 
-async function getFoursquare(business) {
+async function fourSquareFetch(business) {
 	const options = {
 		method: 'GET',
 		headers: {
@@ -97,16 +122,26 @@ async function getFoursquare(business) {
 		}
 	}
 	let limit = 5
-	let lat = userMap.coords[0]
-	let lon = userMap.coords[1]
-	let response = await fetch(`https://api.foursquare.com/v3/places/search?&query=${business}&limit=${limit}&ll=${lat}%2C${lon}`, options)
+	let latitude = userMap.coords[0]
+	let longitude = userMap.coords[1]
+	let response = await fetch(`https://api.foursquare.com/v3/places/search?&query=${business}&limit=${limit}&ll=${latitude}%2C${longitude}`, options)
 	let data = await response.text()
-	let fourSquareResults = await JSON.parse(data)
-    let businessData = fourSquareResults.results
+	let returnedData = await JSON.parse(data)
+    let businessData = returnedData.results
     console.log(businessData)
+    return businessData
     
-        // for(let i=0; i<businessData.length; i++) {
-        // const markers = L.marker(businessData[i].geocodes.latitude,businessData[i].geocodes.longitude)
-        // markers.addTo(userMap).bindPopup('<p1><b>${businessData[i].name}</b></p1>').openPopup()
-        // }
 }
+
+//process the data to get latitudes and longitudes
+    function mapData(data) {
+        let businesses = data.map((element) => {
+            let location = {
+                name: element.name,
+                latitude: element.geocodes.main.latitude,
+                longitude: element.geocodes.main.longitude
+            };
+            return location
+        })
+        return businesses
+    }
