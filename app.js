@@ -8,30 +8,14 @@ async function getCoords(){
 
 console.log(getCoords()); 
 
-// Promise.all([getCoords()]).then((values) => {
-//     console.log(values);
-//   });
-
-// let userLocation = [];
-
-// navigator.geolocation.getCurrentPosition(getLocation)
-
-// function getLocation(position) {
-//     var lat = position.coords.latitude;
-//     var lon = position.coords.longitude;
-//     console.log(lat)
-//     console.log(lon)
-//     userLocation = [lat,lon]
-//     console.log(userLocation)
-// }
-
 //encapsulating map and map functions in userMap object
 const userMap = {
-        createMap: function(coordinates){
-            const coords = coordinates;
+        coords: [],
+
+        createMap: function(){
             // Create map: 
-            const myMap = L.map('map', {
-                center: [coords[0], coords[1]],
+            this.map = L.map('map', {
+                center: this.coords,
                 zoom: 12,
             });
 
@@ -39,7 +23,7 @@ const userMap = {
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                 minZoom: '15',
-            }).addTo(myMap)
+            }).addTo(this.map)
 
             // create red pin marker
             const personPin = L.icon({
@@ -50,28 +34,19 @@ const userMap = {
             })
 
             // Create and add a geolocation marker:
-            const marker = L.marker([coords[0], coords[1]],{icon: personPin})
-            marker.addTo(myMap).bindPopup('<p1><b>You are here!</b></p1>').openPopup()
+            const marker = L.marker(this.coords,{icon: personPin})
+            marker.addTo(this.map).bindPopup('<p1><b>You are here!</b></p1>').openPopup()
 
-        }
+        },
+
  }
-
-// metro station markers
-// Metro station markers:
-    // const rS = L.marker([48.866200610611926, 2.352236247419453],{icon: redPin}).bindPopup('Réaumur-Sébastopol')
-    // const sSD = L.marker([48.869531786321566, 2.3528590208055196],{icon: redPin}).bindPopup('Strasbourg-Saint-Denis')
-    // const sentier = L.marker([48.8673721067762, 2.347107922912739],{icon: redPin}).bindPopup('Sentier')
-    // const bourse = L.marker([48.86868503971672, 2.3412285142058167],{icon: redPin}).bindPopup('Bourse')
-    // const qS = L.marker([48.869560129483226, 2.3358638645569543],{icon: redPin}).bindPopup('Quatre Septembre')
-    // const gB = L.marker([48.871282159004856, 2.3434818588892714],{icon: redPin}).bindPopup('Grands Boulevards')
-
-    // const stations = L.layerGroup([rS, sSD, sentier, bourse, qS, gB]).addTo(myMap)
 
 //handlers
 //onload
 window.onload = async () => {
-    const coords = await getCoords()
-    userMap.createMap(coords)
+    const coordinates = await getCoords()
+    userMap.coords = coordinates
+    userMap.createMap()
 }
 
 //checkbox handlers
@@ -82,7 +57,7 @@ const checkboxMark = document.getElementById('market')
 
 checkboxCof.addEventListener('change', (event) => {
   if (event.currentTarget.checked) {
-    console.log('cof checked');
+    getFoursquare('coffee')
   } else {
     console.log('cof not checked');
   }
@@ -90,7 +65,7 @@ checkboxCof.addEventListener('change', (event) => {
 
 checkboxRest.addEventListener('change', (event) => {
   if (event.currentTarget.checked) {
-    console.log('rest checked');
+    getFoursquare('restaurant')
   } else {
     console.log('rest not checked');
   }
@@ -98,7 +73,7 @@ checkboxRest.addEventListener('change', (event) => {
 
 checkboxHotel.addEventListener('change', (event) => {
     if (event.currentTarget.checked) {
-      console.log('checked');
+      getFoursquare('hotels')
     } else {
       console.log('not checked');
     }
@@ -106,8 +81,32 @@ checkboxHotel.addEventListener('change', (event) => {
 
   checkboxMark.addEventListener('change', (event) => {
     if (event.currentTarget.checked) {
-      console.log('checked');
+      getFoursquare('grocery')
     } else {
       console.log('not checked');
     }
   })
+
+
+async function getFoursquare(business) {
+	const options = {
+		method: 'GET',
+		headers: {
+		Accept: 'application/json',
+		Authorization: 'fsq3nLay+EW8XGwjRje4mtGignySWZNT8d3/bYAFcWDcHpg='
+		}
+	}
+	let limit = 5
+	let lat = userMap.coords[0]
+	let lon = userMap.coords[1]
+	let response = await fetch(`https://api.foursquare.com/v3/places/search?&query=${business}&limit=${limit}&ll=${lat}%2C${lon}`, options)
+	let data = await response.text()
+	let fourSquareResults = await JSON.parse(data)
+    let businessData = fourSquareResults.results
+    console.log(businessData)
+    
+        // for(let i=0; i<businessData.length; i++) {
+        // const markers = L.marker(businessData[i].geocodes.latitude,businessData[i].geocodes.longitude)
+        // markers.addTo(userMap).bindPopup('<p1><b>${businessData[i].name}</b></p1>').openPopup()
+        // }
+}
