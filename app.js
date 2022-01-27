@@ -56,8 +56,6 @@ const userMap = {
         }
  }
 
-
-
 // metro station markers
 // Metro station markers:
     // const rS = L.marker([48.866200610611926, 2.352236247419453],{icon: redPin}).bindPopup('Réaumur-Sébastopol')
@@ -69,15 +67,6 @@ const userMap = {
 
     // const stations = L.layerGroup([rS, sSD, sentier, bourse, qS, gB]).addTo(myMap)
 
-
-// document.getElementById('pinBtn').addEventListener('click',function(){
-//     myMap.removeLayer(stations)
-// })
-
-// document.getElementById('pinBtn').addEventListener('click',function(){
-//     myMap.removeLayer(stations)
-// })
-
 //handlers
 //onload
 window.onload = async () => {
@@ -85,11 +74,40 @@ window.onload = async () => {
     userMap.createMap(coords)
 }
 
+//checkbox handlers
+const checkboxCof = document.getElementById('coffee')
+const checkboxRest = document.getElementById('restaurant')
+const checkboxHotel = document.getElementById('hotel')
+const checkboxMark = document.getElementById('market')
 
-// function toggleGroup (e) {
-//     if (e.checked) {
-//       myMap.addLayer();
-//     } else {
-//       myMap.removeLayer();
-//     }
-//   }
+checkboxCof.addEventListener('change', (event) => {
+  if (event.currentTarget.checked) {
+    console.log('cof checked');
+  } else {
+    console.log('cof not checked');
+  }
+})
+
+checkboxRest.addEventListener('change', (event) => {
+  if (event.currentTarget.checked) {
+    console.log('rest checked');
+  } else {
+    console.log('rest not checked');
+  }
+})
+
+checkboxHotel.addEventListener('change', (event) => {
+    if (event.currentTarget.checked) {
+      console.log('checked');
+    } else {
+      console.log('not checked');
+    }
+  })
+
+  checkboxMark.addEventListener('change', (event) => {
+    if (event.currentTarget.checked) {
+      console.log('checked');
+    } else {
+      console.log('not checked');
+    }
+  })
