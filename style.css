@@ -1,0 +1,21 @@
+#map { 
+    height: 600px; 
+    margin: auto; 
+    border:0.5em solid rgb(60, 73, 126); 
+    background-color: #ccc; }
+
+body { 
+    background-color: rgb(70, 132, 135);
+}
+
+h3 {
+    margin: 0;
+    padding-top: 0.5em;
+    text-align: center;
+}
+
+#selections {
+    color:rgb(0, 0, 0);
+    display: flex;
+    justify-content: center;
+}
